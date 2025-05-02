@@ -6,9 +6,8 @@ import { TbSteeringWheelFilled } from "react-icons/tb";
 import { TfiShiftLeft, TfiShiftRight } from 'react-icons/tfi';
 
 
-function Navbar() {
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [sidebarExpanded, setSidebarExpanded] = useState(true);
+function Navbar({ sidebarOpen, setSidebarOpen}) {
+    const [sidebarExpanded, setSidebarExpanded] = useState(false);
     // const trigger = useRef(null);
     const sidebar = useRef(null);
 
@@ -22,7 +21,7 @@ function Navbar() {
         };
         document.addEventListener('click', clickHandler);
         return () => document.removeEventListener('click', clickHandler);
-    }, [sidebarOpen]);
+    }, [sidebarOpen, setSidebarOpen, sidebar]);
 
     // Closing the sidebar using ESC key
     useEffect(() => {
@@ -32,20 +31,21 @@ function Navbar() {
         };
         document.addEventListener('keydown', keyHandler);
         return () => document.removeEventListener('keydown', keyHandler);
-    }, [sidebarOpen]);
+    }, [sidebarOpen, setSidebarOpen]);
   return (
     <div className='min-w-fit'>
         {/* Overlay */}
         <div 
-            className={`fixed inset-0 bg-slate-900 bg-opacity-30 z-40 lg:hidden lg:z-auto transition-opacity duration-200 ${sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} `} 
+            className={`fixed inset-0 bg-slate-400 bg-opacity-30 z-40 lg:hidden lg:z-auto transition-opacity duration-200 ${sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} `} 
             aria-hidden="true"
+            onClick={()=>{setSidebarOpen(false)}}
         ></div>
 
         {/* Sidebar */}
         <div 
             ref={sidebar} 
             id="sidebar" 
-            className={`flex flex-col absolute z-40 left-0 top-0 shrink-0 bg-slate-800 p-4 transition-all duration-200 ease-in-out overflow-y-scroll no-scrollbar h-[100dvh] lg:static lg:left-auto lg:top-auto lg:overflow-y-auto 2xl:!w-64 ${sidebarExpanded ? 'lg:w-64' : 'lg:w-20'} max-lg:-translate-x-64 ${sidebarOpen ? 'max-lg:translate-x-0' : ''}`}
+            className={`flex flex-col absolute z-40 left-0 top-0 shrink-0 bg-slate-800 p-4 transition-all duration-200 ease-in-out overflow-y-scroll no-scrollbar h-[100dvh] lg:static lg:left-auto lg:top-auto lg:overflow-y-auto 2xl:!w-64 lg:z-auto ${sidebarExpanded ? 'lg:w-64' : 'lg:w-20'} max-lg:-translate-x-64 ${sidebarOpen ? 'max-lg:translate-x-0' : ''}`}
         >
         <div 
             className="flex justify-between mb-10 pr-3 sm:px-2 shrink-0"
