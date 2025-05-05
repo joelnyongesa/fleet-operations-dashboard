@@ -1,7 +1,23 @@
 import React from 'react';
 import { Bars3Icon } from '@heroicons/react/24/solid'
 
-function Header({ sidebarOpen, setSidebarOpen }) {
+function Header({ sidebarOpen, setSidebarOpen, onLogout, }) {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+    async function handleLogout(){
+        try {
+            const response = await fetch(`${baseUrl}/logout`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if(response.ok){
+                onLogout();
+            }
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
   return (
     <header className='sticky top-0 border-b border-slate-200 z-30 bg-white'>
         <div className="px-4 sm:px-6 lg:px-8">
@@ -24,6 +40,7 @@ function Header({ sidebarOpen, setSidebarOpen }) {
                             <span className="truncate ml-2 text-sm font-medium">Demo</span>
                         </div>
                     </button>
+                    <span className="truncate text-sm font-medium bg-indigo-500 text-white whitespace-nowrap ml-3 px-3 py-2 rounded hover:bg-indigo-600 hover:cursor-pointer" onClick={handleLogout}>Log Out</span>
                 </div>
             </div>
         </div>
