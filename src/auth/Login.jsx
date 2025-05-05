@@ -1,10 +1,32 @@
 import React from 'react';
 import BasiGoFleet from '../assets/basigo-home-page-kenya.jpeg';
 import authDecoration from '../assets/auth-decoration.png';
+import { useNavigate } from 'react-router';
 
-function Login() {
-    const email = "demo@email.com";
-    const password = "Fleet!Demo2025&";
+function Login({ onLogin }) {
+    const email = "joel@email.com";
+    const password = "Joel2025$!";
+    const navigate = useNavigate();
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`${baseUrl}/login`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, password}),
+                credentials: "include",
+            });
+            if(response.ok){
+                response.json().then((user) => onLogin(user));
+                navigate("/");
+            }
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
   return (
     <div className="relative flex">
         <div className="w-full md:w-1/2">
@@ -17,7 +39,7 @@ function Login() {
                 <div className='max-w-sm mx-auto w-full px-4 py-8'>
                     <h1 className="text-3xl text-slate-800 font-bold mb-6">Welcome back! ✨</h1>
                     <p className='italic text-slate-500 text-sm mb-6'>Use the provided credentials to sign in</p>
-                    <form action="">
+                    <form onSubmit={handleSubmit}>
                         <input type="hidden" name="" autoComplete='off' />
                         <div className="space-y-4">
                             <div>
@@ -25,11 +47,11 @@ function Login() {
                                     Email
                                 </label>
                                 
-                                <input type="email" name="email" id="email" required className="w-full border rounded border-slate-200 text-slate-500 px-2 py-2 focus:outline-none focus:ring-0 focus:border-slate-400" value={email} />
+                                <input type="email" name="email" id="email" required className="w-full border rounded border-slate-200 text-slate-500 px-2 py-2 focus:outline-none focus:ring-0 focus:border-slate-400" value={email} readOnly/>
                             </div>
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
-                                <input type="password" name="password" id="password" required className="w-full border rounded border-slate-200 px-2 py-2 focus:outline-none focus:ring-0 focus:border-slate-400 text-slate-500" value={password} />
+                                <input type="password" name="password" id="password" required className="w-full border rounded border-slate-200 px-2 py-2 focus:outline-none focus:ring-0 focus:border-slate-400 text-slate-500" value={password} readOnly />
                             </div>
                         </div>
                         <div className="flex items-center justify-between mt-6">
