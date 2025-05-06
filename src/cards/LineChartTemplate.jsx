@@ -2,26 +2,33 @@ import React from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { data } from '../utils/data';
 
-function LineChartTemplate() {
+function LineChartTemplate({ chartData, totalTrips, timeRangeLabel }) {
+    if (!chartData || chartData.length === 0) {
+        return (
+            <div className="px-5 pt-2 pb-5 text-slate-500">
+                Loading trip data or no trips in the selected range...
+            </div>
+        )
+    }
   return (
-    <div className="px-5 pt-2 pb-5">
+    <div className="px-5 pt-3 pb-5">
         {/* Chart Content */}
         <div className="flex items-start">
             <div className="text-sm text-slate-800 mr-2 w-full">
                 <div className="flex flex-wrap justify-between items-end mb-4">
                     <div className="flex items-center justify-center">
                         <div className="text-3xl font-bold text-emerald-400 mr-2">
-                            5 Days Trip Summary
+                            Trip Summary
                         </div>
                         <div className="flex items-center space-x-2 text-sm text-slate-500">
-                            <div className="bg-slate-100 text-xs inline-flex font-semibold text-slate-500 rounded-full text-center px-2 5 py-1">50 Trips</div>
-                            <div className="bg-slate-100 text-xs inline-flex font-semibold text-slate-500 rounded-full text-center px-2.5 py-1">5 Days</div>
+                            <div className="bg-slate-100 text-xs inline-flex font-semibold text-slate-500 rounded-full text-center px-2 5 py-1">{ totalTrips} Trips</div>
+                            <div className="bg-slate-100 text-xs inline-flex font-semibold text-slate-500 rounded-full text-center px-2.5 py-1">{ timeRangeLabel}</div>
                         </div>
                     </div>
                 </div>
                 <div className="grow h-80">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                        <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                             <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false}/>
                             <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`}/>
                             <CartesianGrid strokeDasharray="3 3" />
