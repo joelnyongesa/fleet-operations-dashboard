@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, Polyline, InfoWindow } from '@react-google-maps/api';
-import { routes, MOCK_PROGRESS } from '../utils/data';
+import { MOCK_PROGRESS } from '../utils/data';
 
 // --- Configuration ---
 const MAP_CENTER = { lat: -1.286389, lng: 36.817223 }; // Approx Nairobi CBD
 const MAP_ZOOM = 11;
+const LIBRARIES = ['places', 'geometry'];
 
 const busIconSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="30px" height="30px">
@@ -15,11 +16,11 @@ const encodedBusIcon = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(bu
 
 
 // --- Component ---
-function LocationCardTemplate() {
+function LocationCardTemplate({ routesData = [] }) {
 
     const { isLoaded, loadError } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_REACT_APP_MAPS_API_KEY || "",
-        libraries: ['places', 'geometry'],
+        libraries: LIBRARIES, 
     });
 
     const [directions, setDirections] = useState({});
@@ -30,7 +31,7 @@ function LocationCardTemplate() {
     const directionsServiceRef = useRef(null);
 
     const busMarkerIcon = useMemo(() => {
-        if (!isLoaded) return null; 
+        if (!isLoaded || !window.google || !window.google.maps || !window.google.maps.Size || !window.google.maps.Point) return null;
         return {
             url: encodedBusIcon,
             scaledSize: new window.google.maps.Size(30, 30),
@@ -41,9 +42,9 @@ function LocationCardTemplate() {
 
     const getPointAlongPath = useCallback((path, fraction) => {
         if (!isLoaded || !window.google?.maps?.geometry?.spherical || !path || path.length < 2) {
-             console.warn("Geometry library not loaded or path invalid for getPointAlongPath");
-             return null;
-         }
+            console.warn("Google Maps Geometry library not loaded or path invalid for getPointAlongPath.");
+            return null;
+        }
 
         const totalDistance = window.google.maps.geometry.spherical.computeLength(path);
         if (totalDistance === 0) return path[0];
@@ -61,9 +62,7 @@ function LocationCardTemplate() {
             if (accumulatedDistance + legDistance >= targetDistance) {
                 const remainingDistance = targetDistance - accumulatedDistance;
                 const legFraction = remainingDistance / legDistance;
-
                 const clampedFraction = Math.max(0, Math.min(1, legFraction));
-
                 return window.google.maps.geometry.spherical.interpolate(legStart, legEnd, clampedFraction);
             }
             accumulatedDistance += legDistance;
@@ -71,60 +70,86 @@ function LocationCardTemplate() {
         return path[path.length - 1];
     }, [isLoaded]);
 
-    useEffect(() => {
-        if (!isLoaded || !window.google || directionsServiceRef.current) return;
 
-        directionsServiceRef.current = new window.google.maps.DirectionsService();
+    useEffect(() => {
+        if (isLoaded && window.google && !directionsServiceRef.current) {
+            directionsServiceRef.current = new window.google.maps.DirectionsService();
+        }
+
+        if (!isLoaded || !directionsServiceRef.current || !routesData || routesData.length === 0) {
+
+            if (routesData.length === 0) {
+                setDirections({});
+                setBusPositions({});
+            }
+            return;
+        }
+
         const service = directionsServiceRef.current;
         const newDirections = {};
         const newBusPositions = {};
-        let routesProcessed = 0;
+        let routesProcessedCount = 0;
 
-        routes.forEach(route => {
+        const batchedDirections = {};
+        const batchedBusPositions = {};
+
+        routesData.forEach(apiRoute => {
+            if (!apiRoute || typeof apiRoute.start_latitude !== 'number' || typeof apiRoute.start_longitude !== 'number' ||
+                typeof apiRoute.end_latitude !== 'number' || typeof apiRoute.end_longitude !== 'number') {
+                console.error("Invalid route data:", apiRoute);
+                routesProcessedCount++;
+                if (routesProcessedCount === routesData.length) {
+                    setDirections(batchedDirections);
+                    setBusPositions(batchedBusPositions);
+                }
+                return;
+            }
+
+            const origin = { lat: apiRoute.start_latitude, lng: apiRoute.start_longitude };
+            const destination = { lat: apiRoute.end_latitude, lng: apiRoute.end_longitude };
+
             service.route(
                 {
-                    origin: route.origin,
-                    destination: route.destination,
+                    origin: origin,
+                    destination: destination,
                     travelMode: window.google.maps.TravelMode.DRIVING,
-                    drivingOptions: {
-                        departureTime: new Date(),
-                        trafficModel: window.google.maps.TrafficModel.BEST_GUESS,
-                    },
                 },
                 (result, status) => {
-                    routesProcessed++;
+                    routesProcessedCount++;
                     if (status === window.google.maps.DirectionsStatus.OK && result) {
-                        newDirections[route.id] = result;
+                        batchedDirections[apiRoute.id] = result;
 
                         const path = result.routes[0]?.overview_path;
-                        const progress = MOCK_PROGRESS[route.id] || 0;
+                        const progress = MOCK_PROGRESS[apiRoute.id] || 0;
                         const position = getPointAlongPath(path, progress);
 
                         if (position) {
-                             newBusPositions[route.id] = { lat: position.lat(), lng: position.lng() };
+                            batchedBusPositions[apiRoute.id] = { lat: position.lat(), lng: position.lng() };
                         } else {
-                            newBusPositions[route.id] = route.origin;
+                            batchedBusPositions[apiRoute.id] = origin; 
                         }
                     } else {
-                        console.error(`Directions request failed for route ${route.name} due to ${status}`);
+                        console.error(`Directions request failed for route ${apiRoute.name} (ID: ${apiRoute.id}) due to ${status}`);
+                        batchedBusPositions[apiRoute.id] = origin; 
                     }
 
-                    if (routesProcessed === routes.length) {
-                        setDirections(newDirections);
-                        setBusPositions(newBusPositions);
+                    if (routesProcessedCount === routesData.length) {
+                        setDirections(batchedDirections);
+                        setBusPositions(batchedBusPositions);
                     }
                 }
             );
         });
 
-    }, [isLoaded, getPointAlongPath]);
+    }, [isLoaded, routesData, getPointAlongPath]);
 
 
-    const handleMarkerMouseOver = useCallback((routeId) => {
+    const handleMarkerMouseOver = useCallback((routeId) => { 
         const directionResult = directions[routeId];
         const position = busPositions[routeId];
+        const apiRoute = routesData.find(r => r.id === routeId);
 
-        if (!directionResult || !position || !isLoaded || !window.google) return;
+        if (!directionResult || !position || !apiRoute || !isLoaded || !window.google) return;
 
         const leg = directionResult.routes[0]?.legs[0];
         const durationInTraffic = leg?.duration_in_traffic;
@@ -141,8 +166,8 @@ function LocationCardTemplate() {
             etaString = `Est. Total Trip: ${leg.duration.text}`;
         }
 
-        setActiveMarker({ routeId, position, eta: etaString, name: routes.find(r => r.id === routeId)?.name || 'Unknown Route' });
-    }, [directions, busPositions, isLoaded]);
+        setActiveMarker({ routeId, position, eta: etaString, name: apiRoute.name });
+    }, [directions, busPositions, isLoaded, routesData]);
 
     const handleMarkerMouseOut = useCallback(() => {
         setActiveMarker(null);
@@ -152,21 +177,30 @@ function LocationCardTemplate() {
         mapRef.current = map;
     }, []);
 
-    // --- Render Logic ---
+
     if (loadError) {
-        return <div>Error loading maps. Check API key and console.</div>;
+        console.error("Google Maps API load error:", loadError);
+        return (
+            <div className='px-5 pt-2 pb-5 text-red-600 dark:text-red-400'>
+                Error loading maps. Please check your API key and ensure the Google Maps JavaScript API is enabled.
+            </div>
+        );
     }
 
-    // Display loading state
-    if (!isLoaded || !busMarkerIcon) { 
-         return <div className='px-5 pt-2 pb-5'>Loading Map...</div>;
+    if (!isLoaded) {
+         return <div className='px-5 pt-2 pb-5 text-slate-500 dark:text-slate-400'>Loading Map...</div>;
     }
 
-    // Render the map now that everything is loaded
+    if (!busMarkerIcon && isLoaded) { 
+        console.warn("Bus marker icon not ready yet, though API is loaded.");
+        return <div className='px-5 pt-2 pb-5 text-slate-500 dark:text-slate-400'>Initializing map assets...</div>;
+    }
+
+
     return (
-        <div className='px-5 pt-2 pb-5'>
-            <h3 className="text-3xl font-bold text-emerald-400 mr-2 mb-2">Live Trip Map</h3>
-            <div className="map-container" style={{ height: '500px', width: '100%', border: '1px solid #ccc' }}>
+        <div className='px-5 pt-3 pb-5  rounded-lg'>
+            <h3 className="text-2xl md:text-3xl font-bold text-emerald-500 dark:text-emerald-400 mb-4">Live Trip Map</h3>
+            <div className="map-container rounded-md overflow-hidden" style={{ height: '500px', width: '100%', border: '1px solid #e2e8f0' }}>
                 <GoogleMap
                     mapContainerStyle={{ height: '100%', width: '100%' }}
                     center={MAP_CENTER}
@@ -176,50 +210,53 @@ function LocationCardTemplate() {
                         disableDefaultUI: true,
                     }}
                 >
-                    {/* Draw Polylines */}
-                    {Object.entries(directions).map(([routeId, result]) => {
-                        const routeConfig = routes.find(r => r.id === routeId);
+                    {Object.entries(directions).map(([routeIdStr, result]) => {
+                        const routeId = parseInt(routeIdStr, 10);
+                        const routeConfig = routesData.find(r => r.id === routeId);
+                        if (!result.routes || result.routes.length === 0) return null; 
                         return (
                             <Polyline
-                                key={routeId}
+                                key={`poly-${routeId}`}
                                 path={result.routes[0]?.overview_path}
                                 options={{
-                                    strokeColor: routeConfig?.color || '#FF0000',
-                                    strokeWeight: 4,
-                                    strokeOpacity: 0.8,
+                                    strokeColor: routeConfig?.color || '#10B981', 
+                                    strokeWeight: 5,
+                                    strokeOpacity: 0.75,
                                     zIndex: 1
                                 }}
                             />
                         )
                     })}
 
-                    {/* Draw Markers */}
-                    {Object.entries(busPositions).map(([routeId, position]) => (
-                        <Marker
-                            key={`marker-${routeId}`}
-                            position={position}
-                            icon={busMarkerIcon} // Use the memoized icon object
-                            title={routes.find(r => r.id === routeId)?.name}
-                            onMouseOver={() => handleMarkerMouseOver(routeId)}
-                            onMouseOut={handleMarkerMouseOut}
-                            zIndex={2}
-                        />
-                    ))}
+                    {Object.entries(busPositions).map(([routeIdStr, position]) => {
+                         const routeId = parseInt(routeIdStr, 10); 
+                         const routeConfig = routesData.find(r => r.id === routeId);
+                         if (!busMarkerIcon) return null; 
+                         return (
+                            <Marker
+                                key={`marker-${routeId}`}
+                                position={position}
+                                icon={busMarkerIcon}
+                                title={routeConfig?.name || 'Unknown Route'}
+                                onMouseOver={() => handleMarkerMouseOver(routeId)}
+                                onMouseOut={handleMarkerMouseOut}
+                                zIndex={2}
+                            />
+                        )
+                    })}
 
-                    {/* Info Window */}
                     {activeMarker && (
                         <InfoWindow
                             position={activeMarker.position}
                             onCloseClick={() => setActiveMarker(null)}
-                             options={{ zIndex: 3 }}
+                            options={{ zIndex: 3 }}
                         >
-                            <div>
-                                <h4 style={{ margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{activeMarker.name}</h4>
-                                <p style={{ margin: '4px 0 0', fontSize: '0.85rem' }}>{activeMarker.eta}</p>
+                            <div className="p-1 bg-white dark:bg-slate-700 rounded-md shadow-md">
+                                <h4 className="m-0 font-semibold text-sm text-slate-700 dark:text-slate-200">{activeMarker.name}</h4>
+                                <p className="mt-1 mb-0 text-xs text-slate-600 dark:text-slate-300">{activeMarker.eta}</p>
                             </div>
                         </InfoWindow>
                     )}
-
                 </GoogleMap>
             </div>
         </div>
