@@ -4,7 +4,13 @@ import CardTemplate from '../cards/CardTemplate';
 import LineChartTemplate from '../cards/LineChartTemplate';
 import LocationCardTemplate from '../cards/LocationCardTemplate';
 
-function Dashboard({ sidebarOpen, setSidebarOpen, onLogout, vehicles, setVehicles, drivers, setDrivers }) {
+const formatDate = (dateString) => {
+    if(!dateString) return null;
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+}
+
+function Dashboard({ sidebarOpen, setSidebarOpen, onLogout, vehicles, setVehicles, drivers, setDrivers, trips, setTrips, routesData }) {
     const kpiData = useMemo(() => {
         if (!vehicles || vehicles.length === 0) {
             return {
@@ -54,6 +60,32 @@ function Dashboard({ sidebarOpen, setSidebarOpen, onLogout, vehicles, setVehicle
             return acc;
         }, { Available: 0, Unavailable: 0});
 
+        // Trips
+        const validTrips = Array.isArray(trips) ? trips.filter(t => t && !t.error && t.start_time) : [];
+        const today = new Date();
+        const tripCountsByDate = [];
+        const lastFiveDaysData = [];
+        let totalTripsInLastFiveDays = 0;
+
+        for (let i=4; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            const formattedDate = formatDate(date.toISOString());
+            tripCountsByDate[formattedDate] = { date: formattedDate, trips: 0 };
+        }
+
+        validTrips.forEach(trip => {
+            const tripDate = formatDate(trip.start_time);
+            if (tripCountsByDate.hasOwnProperty(tripDate)) {
+                tripCountsByDate[tripDate].trips += 1;
+                totalTripsInLastFiveDays++;
+            }
+        });
+
+        Object.keys(tripCountsByDate).sort().forEach(dateKey => {
+            lastFiveDaysData.push(tripCountsByDate[dateKey]);
+        })
+
         return {
             totalVehicles: vehicles.length,
             vehicleStatusCounts: statusCounts,
@@ -61,8 +93,10 @@ function Dashboard({ sidebarOpen, setSidebarOpen, onLogout, vehicles, setVehicle
             driverStatus: driverStatusCounts,
             ongoingCharging: ongoingChargingCount,
             unresolvedMaintenance: unresolvedMaintenanceCount,
+            tripChartData: lastFiveDaysData,
+            totalTripsInLastFiveDays: totalTripsInLastFiveDays,
         };
-    }, [vehicles, drivers])
+    }, [vehicles, drivers, trips])
   return (
     <div className='relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden text-black' x-ref='contentarea'>
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={onLogout} />
@@ -89,12 +123,12 @@ function Dashboard({ sidebarOpen, setSidebarOpen, onLogout, vehicles, setVehicle
 
                 {/* Line Graph */}
                 <div className="flex flex-col col-span-12 bg-white shadow-sm rounded-lg border border-slate-200 mb-4">
-                    {<LineChartTemplate />}
+                    {<LineChartTemplate chartData={kpiData.tripChartData} totalTrips={kpiData.totalTripsInLastFiveDays} timeRangeLabel="Last 5 Days"/>}
                 </div>
 
                 {/* Map - Bus Locator and Ongoing Trips */}
                 <div className="flex flex-col col-span-12 bg-white shadow-sm rounded-lg border border-slate-200 mb-4">
-                    {<LocationCardTemplate />}
+                    {<LocationCardTemplate routesData={routesData} />}
                 </div>
             </div>
         </main>
