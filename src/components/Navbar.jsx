@@ -95,7 +95,7 @@ function Navbar({ sidebarOpen, setSidebarOpen}) {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <FaBus className='w-[24px] h-[24px]' />
-                                    <span className={`text-sm font-medium ml-3 transition-opacity duration-200 ${sidebarExpanded ? 'lg:opacity-100' : 'lg-opacity-0'} 2xl:opacity-100`}>Vehicles</span>
+                                    <span className={`text-sm font-medium ml-3 transition-opacity duration-200 ${sidebarExpanded ? 'lg:opacity-100' : 'lg-opacity-0'} 2xl:opacity-100`}>Buses</span>
                                 </div>
                             </div>
                         </a>
@@ -137,7 +137,7 @@ function Navbar({ sidebarOpen, setSidebarOpen}) {
                 <div className="px-3 py-2 text-slate-500 hover:text-slate-400">
                     <button onClick={()=>{setSidebarExpanded(!sidebarExpanded)}}>
                         <span className="sr-only">Expand / Collapse sidebar</span>
-                        {sidebarExpanded ? <TfiShiftLeft className='w-[24px] h-[24px]' /> : <TfiShiftRight className='w-[24px] h-[24px]' />}
+                        {sidebarExpanded ? <TfiShiftLeft className='w-[24px] h-[24px]' /> : <TfiShiftRight className='w-[24px] h-[24px] hover:cursor-pointer' />}
                         </button>
                 </div>
             </div>
