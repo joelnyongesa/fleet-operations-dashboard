@@ -4,7 +4,7 @@ function CardTemplate({ header, content}) {
     const renderContent = () => {
         if(typeof content === 'string' || typeof content === 'number') {
             return (
-                <div className="text-3xl font-bold text-slate-800">
+                <div className="text-xl font-bold text-slate-600">
                     {content}
                 </div>
             );
@@ -12,7 +12,7 @@ function CardTemplate({ header, content}) {
 
         if (typeof content === 'object' & content !== null && !Array.isArray(content)) {
             return (
-                <div className="text-sm italic text-slate-800 w-full">
+                <div className="text-xs italic text-slate-800 w-full">
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                         {Object.entries(content).map(([key, value]) => (
                             <div key={key}>
