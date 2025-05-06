@@ -18,6 +18,7 @@ function App() {
   const [chargingSessions, setChargingSessions] = useState([]);
   const [upcomingMaintenances, setUpcomingMaintenances] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [routes, setRoutes] = useState([]);
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   
@@ -32,7 +33,7 @@ function App() {
         setIsAuthenticated(false);
       }
     })
-  }, []);
+  }, [baseUrl]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -70,10 +71,22 @@ function App() {
     }
   }, [isAuthenticated, baseUrl]);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetch(`${baseUrl}/routes`, {
+        credentials: "include",
+      }).then((response) => {
+        if (response.ok){
+          response.json().then((routes) => setRoutes(routes));
+        }
+      })
+    }
+  }, [isAuthenticated, baseUrl]);
+
   console.log(vehicles);
   console.log(drivers);
   console.log(trips);
-  
+  console.log(routes);  
   
 
   function handleLogin(user){
@@ -91,7 +104,7 @@ function App() {
     <div className='flex h-screen overflow-hidden'>
       <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <Routes>
-        <Route path="/" element={<Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} vehicles={vehicles} setVehicles={setVehicles} drivers={drivers} setDrivers={setDrivers}/>} />
+        <Route path="/" element={<Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} vehicles={vehicles} setVehicles={setVehicles} drivers={drivers} setDrivers={setDrivers} trips={trips} setTrips={setTrips} routesData={routes}/>} />
       </Routes>
     </div>
   ) : (
