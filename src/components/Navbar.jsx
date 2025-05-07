@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router';
 
 import { HomeIcon, WrenchScrewdriverIcon, DocumentChartBarIcon } from '@heroicons/react/24/solid';
 import { FaBus } from "react-icons/fa";
@@ -8,6 +9,7 @@ import { TfiShiftLeft, TfiShiftRight } from 'react-icons/tfi';
 
 function Navbar({ sidebarOpen, setSidebarOpen}) {
     const [sidebarExpanded, setSidebarExpanded] = useState(false);
+    const navigate = useNavigate();
     // const trigger = useRef(null);
     const sidebar = useRef(null);
 
@@ -81,24 +83,24 @@ function Navbar({ sidebarOpen, setSidebarOpen}) {
                 </h3>
                 <ul className="mt-3 space-y-3">
                     <li className="px-3 py-2 rounded-sm mb-0 5 last:mb-0">
-                        <a href="#" className="block text-slate-200 hover:text-white truncate transition duration-150">
+                        <div onClick={()=>{navigate("/")}} className="block text-slate-200 hover:text-white truncate transition duration-150 hover:cursor-pointer">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <HomeIcon className='w-[24px] h-[24px] shrink-0' />
                                     <span className={`text-sm font-medium ml-3 transition-opacity duration-200 ${sidebarExpanded ? 'lg:opacity-100' : 'lg-opacity-0'} 2xl:opacity-100`}>Dashboard</span>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </li>
                     <li className="px-3 py-2 rounded-sm mb-0 5 last:mb-0">
-                        <a href="#" className="block text-slate-200 hover:text-white truncate transition duration-150">
+                        <div onClick={()=>navigate("/buses")} className="block text-slate-200 hover:text-white truncate transition duration-150 hover:cursor-pointer">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <FaBus className='w-[24px] h-[24px]' />
                                     <span className={`text-sm font-medium ml-3 transition-opacity duration-200 ${sidebarExpanded ? 'lg:opacity-100' : 'lg-opacity-0'} 2xl:opacity-100`}>Buses</span>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </li>
                     <li className="px-3 py-2 rounded-sm mb-0 5 last:mb-0">
                         <a href="#" className="block text-slate-200 hover:text-white truncate transition duration-150">
