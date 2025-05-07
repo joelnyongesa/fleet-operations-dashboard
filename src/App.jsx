@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
+import Buses from "./pages/Buses";
 import Login from "./auth/Login";
 
 function App() {
@@ -105,6 +106,7 @@ function App() {
       <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <Routes>
         <Route path="/" element={<Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} vehicles={vehicles} setVehicles={setVehicles} drivers={drivers} setDrivers={setDrivers} trips={trips} setTrips={setTrips} routesData={routes}/>} />
+        <Route path="/buses" element={<Buses sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} vehicles={vehicles} setVehicles={setVehicles} />}/>
       </Routes>
     </div>
   ) : (
