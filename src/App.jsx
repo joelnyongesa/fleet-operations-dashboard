@@ -9,6 +9,9 @@ import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Buses from "./pages/Buses";
 import Login from "./auth/Login";
+import Drivers from "./pages/Drivers";
+import Maintenance from "./pages/MaintenanceRecords";
+import Reports from "./pages/Reports";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -107,6 +110,13 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} vehicles={vehicles} setVehicles={setVehicles} drivers={drivers} setDrivers={setDrivers} trips={trips} setTrips={setTrips} routesData={routes}/>} />
         <Route path="/buses" element={<Buses sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} vehicles={vehicles} setVehicles={setVehicles} />}/>
+        <Route path="/drivers" element={<Drivers sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} drivers={drivers} setDrivers={setDrivers}/>}/>
+        <Route path="/maintenance" element={<Maintenance sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} vehicles={vehicles}/>} />
+        <Route path="/reports" element={<Reports sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} onLogout={handleLogout} vehicles={vehicles} drivers={drivers} trips={trips}
+        />
+          }
+        />
+
       </Routes>
     </div>
   ) : (
