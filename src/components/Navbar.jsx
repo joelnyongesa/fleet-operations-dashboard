@@ -103,34 +103,34 @@ function Navbar({ sidebarOpen, setSidebarOpen}) {
                         </div>
                     </li>
                     <li className="px-3 py-2 rounded-sm mb-0 5 last:mb-0">
-                        <a href="#" className="block text-slate-200 hover:text-white truncate transition duration-150">
+                        <div onClick={()=>navigate("/drivers")} className="block text-slate-200 hover:text-white truncate transition duration-150 hover:cursor-pointer">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <TbSteeringWheelFilled className='w-[24px] h-[24px]' />
                                     <span className={`text-sm font-medium ml-3 transition-opacity duration-200 ${sidebarExpanded ? 'lg:opacity-100' : 'lg-opacity-0'} 2xl:opacity-100`}>Drivers</span>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </li>
                     <li className="px-3 py-2 rounded-sm mb-0 5 last:mb-0">
-                        <a href="#" className="block text-slate-200 hover:text-white truncate transition duration-150">
+                        <div onClick={()=>navigate("/maintenance")} className="block text-slate-200 hover:text-white truncate transition duration-150 hover:cursor-pointer">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <WrenchScrewdriverIcon className='w-[24px] h-[24px]' />
                                     <span className={`text-sm font-medium ml-3 transition-opacity duration-200 ${sidebarExpanded ? 'lg:opacity-100' : 'lg-opacity-0'} 2xl:opacity-100`}>Maintenance</span>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </li>
                     <li className="px-3 py-2 rounded-sm mb-0 5 last:mb-0">
-                        <a href="#" className="block text-slate-200 hover:text-white truncate transition duration-150">
+                        <div onClick={()=>{navigate("/reports")}}className="block text-slate-200 hover:text-white truncate transition duration-150 hover:cursor-pointer">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <DocumentChartBarIcon className='w-[24px] h-[24px]' />
                                     <span className={`text-sm font-medium ml-3 transition-opacity duration-200 ${sidebarExpanded ? 'lg:opacity-100' : 'lg-opacity-0'} 2xl:opacity-100`}>Reports</span>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </li>
                 </ul>
             </div>
