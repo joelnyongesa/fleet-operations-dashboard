@@ -64,7 +64,7 @@ function Login({ onLogin }) {
                     </form>
                     <div className="pt-5 mt-6 border-t border-slate-200">
                         <div className="text-sm">
-                            Dont you have an Account?
+                            Don't have an account?
                             <a href="" className="font-medium text-indigo-500 hover:text-indigo-600 ml-2">Sign Up</a>
                         </div>
                     </div>
