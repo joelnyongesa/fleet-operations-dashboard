@@ -4,8 +4,8 @@ import authDecoration from '../assets/auth-decoration.png';
 import { useNavigate } from 'react-router';
 
 function Login({ onLogin }) {
-    const email = "joel@email.com";
-    const password = "Joel2025$!";
+    const email = "demo@email.com";
+    const password = "Fleet!Demo2025&";
     const navigate = useNavigate();
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
