@@ -1,6 +1,7 @@
 // src/pages/Buses.jsx
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 function Buses({ sidebarOpen, setSidebarOpen, onLogout, vehicles }) {
@@ -95,13 +96,7 @@ function Buses({ sidebarOpen, setSidebarOpen, onLogout, vehicles }) {
           {/* Vehicle Table */}
           <div className="overflow-x-auto mt-6">
             {vehicles.length === 0 ? (
-              <div className="flex items-center justify-center py-20">
-                <svg className="animate-spin h-8 w-8 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                </svg>
-                <span className="ml-3 text-slate-600 font-medium">Loading vehicles...</span>
-              </div>
+              <LoadingSpinner text="Loading vehicles..." />
             ) : (
               <table className="min-w-full text-left text-sm">
                 <thead className="bg-slate-100 text-xs uppercase text-gray-700">

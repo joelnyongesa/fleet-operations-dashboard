@@ -5,6 +5,7 @@ import CardTemplate from '../cards/CardTemplate';
 import LineChartTemplate from '../cards/LineChartTemplate';
 import BarChartTemplate from '../cards/BarChartTemplate';
 import { exportToCSV } from '../utils/exportHelpers';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const formatDate = (dateString) => {
   if (!dateString) return null;
@@ -12,7 +13,7 @@ const formatDate = (dateString) => {
   return date.toISOString().split('T')[0];
 };
 
-function Reports({ sidebarOpen, setSidebarOpen, onLogout, vehicles = [], drivers = [], trips = [] }) {
+function Reports({ sidebarOpen, setSidebarOpen, onLogout, vehicles = [], drivers = [], trips = [], loading }) {
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -139,61 +140,67 @@ function Reports({ sidebarOpen, setSidebarOpen, onLogout, vehicles = [], drivers
             </select>
           </div>
 
-          <div className="grid grid-cols-12 gap-3 mb-4">
-            <CardTemplate header={"Underutilized Vehicles (7d)"} content={reportData.underutilizedVehicles.length} />
-            <CardTemplate header={"Unresolved Maintenances"} content={reportData.unresolvedMaintenance.length} />
-          </div>
+          {loading ? (
+            <LoadingSpinner text="Loading reports..." />
+          ) : (
+            <>
+              <div className="grid grid-cols-12 gap-3 mb-4">
+                <CardTemplate header={"Underutilized Vehicles (7d)"} content={reportData.underutilizedVehicles.length} />
+                <CardTemplate header={"Unresolved Maintenances"} content={reportData.unresolvedMaintenance.length} />
+              </div>
 
-          <div className="bg-white shadow rounded-lg p-4 border border-slate-200 mb-6">
-            <BarChartTemplate
-              chartData={reportData.tripsPerDriver}
-              xKey="name"
-              yKey="trips"
-              title="Trips Per Driver"
-            />
-          </div>
+              <div className="bg-white shadow rounded-lg p-4 border border-slate-200 mb-6">
+                <BarChartTemplate
+                  chartData={reportData.tripsPerDriver}
+                  xKey="name"
+                  yKey="trips"
+                  title="Trips Per Driver"
+                />
+              </div>
 
-          <div className="bg-white shadow rounded-lg p-4 border border-slate-200 mb-6">
-            <LineChartTemplate
-              chartData={reportData.maintenanceChartData}
-              title="Maintenance Trends Over Time"
-              xKey="date"
-              yKeys={["resolved", "unresolved"]}
-              colors={["#10B981", "#EF4444"]}
-              stacked={false}
-            />
-          </div>
+              <div className="bg-white shadow rounded-lg p-4 border border-slate-200 mb-6">
+                <LineChartTemplate
+                  chartData={reportData.maintenanceChartData}
+                  title="Maintenance Trends Over Time"
+                  xKey="date"
+                  yKeys={["resolved", "unresolved"]}
+                  colors={["#10B981", "#EF4444"]}
+                  stacked={false}
+                />
+              </div>
 
-          <div className="bg-white shadow rounded-lg p-4 border border-slate-200 mb-6">
-            <BarChartTemplate
-              chartData={reportData.maintenanceCountByVehicle}
-              xKey="name"
-              yKey="count"
-              title="Maintenance Events per Vehicle"
-            />
-          </div>
+              <div className="bg-white shadow rounded-lg p-4 border border-slate-200 mb-6">
+                <BarChartTemplate
+                  chartData={reportData.maintenanceCountByVehicle}
+                  xKey="name"
+                  yKey="count"
+                  title="Maintenance Events per Vehicle"
+                />
+              </div>
 
 
-          {reportData.underutilizedVehicles.length > 0 && (
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 mb-6">
-              <strong>Note:</strong> The following vehicles have not been used in the past 7 days:
-              <ul className="list-disc list-inside mt-2">
-                {reportData.underutilizedVehicles.map((v, index) => (
-                  <li key={index}>{v}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+              {reportData.underutilizedVehicles.length > 0 && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 mb-6">
+                  <strong>Note:</strong> The following vehicles have not been used in the past 7 days:
+                  <ul className="list-disc list-inside mt-2">
+                    {reportData.underutilizedVehicles.map((v, index) => (
+                      <li key={index}>{v}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-          {reportData.unresolvedMaintenance.length > 0 && (
-            <div className="bg-red-50 border-l-4 border-red-400 text-red-700 p-4">
-              <strong>Alert:</strong> These maintenance issues are still unresolved:
-              <ul className="list-disc list-inside mt-2">
-                {reportData.unresolvedMaintenance.map((item, idx) => (
-                  <li key={idx}>{item.vehicle} - {item.issue} on {item.date}</li>
-                ))}
-              </ul>
-            </div>
+              {reportData.unresolvedMaintenance.length > 0 && (
+                <div className="bg-red-50 border-l-4 border-red-400 text-red-700 p-4">
+                  <strong>Alert:</strong> These maintenance issues are still unresolved:
+                  <ul className="list-disc list-inside mt-2">
+                    {reportData.unresolvedMaintenance.map((item, idx) => (
+                      <li key={idx}>{item.vehicle} - {item.issue} on {item.date}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

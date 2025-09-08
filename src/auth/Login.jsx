@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BasiGoFleet from '../assets/basigo-home-page-kenya.jpeg';
 import authDecoration from '../assets/auth-decoration.png';
 import { useNavigate } from 'react-router';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function Login({ onLogin }) {
+    const [loading, setLoading] = useState(false);
     const email = "example@email.com";
     const password = "FleetD2025@&";
     const navigate = useNavigate();
@@ -11,6 +13,7 @@ function Login({ onLogin }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const response = await fetch(`${baseUrl}/login`, {
                 method: "POST",
@@ -25,6 +28,8 @@ function Login({ onLogin }) {
         }
         catch(err){
             console.log(err);
+        } finally {
+            setLoading(false);
         }
     }
   return (
@@ -39,6 +44,9 @@ function Login({ onLogin }) {
                 <div className='max-w-sm mx-auto w-full px-4 py-8'>
                     <h1 className="text-3xl text-slate-800 font-bold mb-6">Welcome back! ✨</h1>
                     <p className='italic text-slate-500 text-sm mb-6'>Use the provided credentials to sign in</p>
+                    {loading ? (
+                        <LoadingSpinner text="Logging in..." />
+                    ) : (
                     <form onSubmit={handleSubmit}>
                         <input type="hidden" name="" autoComplete='off' />
                         <div className="space-y-4">
@@ -62,6 +70,7 @@ function Login({ onLogin }) {
                             <button type="submit" className='bg-indigo-500 text-white whitespace-nowrap ml-3 px-3 py-2 rounded hover:bg-indigo-600 hover:cursor-pointer'>Sign In</button>
                         </div>
                     </form>
+                    )}
                     <div className="pt-5 mt-6 border-t border-slate-200">
                         <div className="text-sm">
                             Don't have an account?
@@ -81,4 +90,4 @@ function Login({ onLogin }) {
   )
 }
 
-export default Login
+export default Login;

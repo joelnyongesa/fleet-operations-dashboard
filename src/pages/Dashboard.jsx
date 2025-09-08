@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import CardTemplate from '../cards/CardTemplate';
 import LineChartTemplate from '../cards/LineChartTemplate';
 import LocationCardTemplate from '../cards/LocationCardTemplate';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const formatDate = (dateString) => {
     if(!dateString) return null;
@@ -10,7 +11,7 @@ const formatDate = (dateString) => {
     return date.toISOString().split('T')[0];
 }
 
-function Dashboard({ sidebarOpen, setSidebarOpen, onLogout, vehicles, setVehicles, drivers, setDrivers, trips, setTrips, routesData }) {
+function Dashboard({ sidebarOpen, setSidebarOpen, onLogout, vehicles, setVehicles, drivers, setDrivers, trips, setTrips, routesData, loading }) {
     const kpiData = useMemo(() => {
         if (!vehicles || vehicles.length === 0) {
             return {
@@ -132,6 +133,7 @@ function Dashboard({ sidebarOpen, setSidebarOpen, onLogout, vehicles, setVehicle
                 </div>
             </div>
         </main>
+        {loading && <LoadingSpinner text="Loading dashboard..." />}
     </div>    
   )
 }
