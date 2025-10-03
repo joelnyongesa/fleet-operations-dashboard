@@ -45,7 +45,20 @@ function Login({ onLogin }) {
                     <h1 className="text-3xl text-slate-800 font-bold mb-6">Welcome back! ✨</h1>
                     <p className='italic text-slate-500 text-sm mb-6'>Use the provided credentials to sign in</p>
                     {loading ? (
-                        <LoadingSpinner text="Logging in..." />
+                        <div>
+                            <LoadingSpinner text="Logging in..." />
+                            <div className="mt-4 text-xs text-slate-500 text-center max-w-xs mx-auto">
+                                This project uses a free instance on Render. Sometimes, the web service may take a while to start because it spins down when not in use.<br />
+                                <a
+                                    href="https://render.com/docs/free"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline text-indigo-500 hover:text-indigo-600"
+                                >
+                                    Learn more
+                                </a>
+                            </div>
+                        </div>
                     ) : (
                     <form onSubmit={handleSubmit}>
                         <input type="hidden" name="" autoComplete='off' />
